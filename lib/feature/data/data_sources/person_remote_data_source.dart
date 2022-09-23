@@ -1,8 +1,8 @@
 import 'dart:convert';
+import 'package:http/http.dart' as http;
 
 import 'package:clean_arch/core/error/exception.dart';
 import 'package:clean_arch/feature/data/models/person_model.dart';
-import 'package:http/http.dart' as http;
 
 abstract class PersonRemoteDataSource {
   Future<List<PersonModel>> getAllPersons(int page);

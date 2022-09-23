@@ -1,8 +1,8 @@
 import 'dart:convert';
 
 import 'package:clean_arch/core/error/exception.dart';
-import 'package:clean_arch/feature/data/models/person_model.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:clean_arch/feature/data/models/person_model.dart';
 
 abstract class PersonLocalDataSource {
   Future<List<PersonModel>> getLastPersonsFromCache();
@@ -21,9 +21,11 @@ class PersonLocalDataSourceImpl implements PersonLocalDataSource {
   Future<List<PersonModel>> getLastPersonsFromCache() async {
     final jsonPersonsList = sharedPreferences.getStringList(cachedPersonsList);
     if (jsonPersonsList != null) {
-      return Future.value(jsonPersonsList.map((e) => null))
+      return Future.value(jsonPersonsList
+          .map((person) => PersonModel.fromJson(json.decode(person)))
+          .toList());
     } else {
-      CacheException();
+      throw CacheException();
     }
   }
 
