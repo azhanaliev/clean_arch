@@ -20,7 +20,11 @@ dependencies:
   #functional programming things
   dartz: ^0.10.1
 
+  #work with API
   http: ^0.13.5
+  internet_connection_checker: ^1.0.0+1
+
+  #work with local cache
   shared_preferences: ^2.0.15
 
 dev_dependencies:
