@@ -1,6 +1,7 @@
+
+
 import 'package:dartz/dartz.dart';
 import 'package:equatable/equatable.dart';
-
 import 'package:clean_arch/core/error/failure.dart';
 import 'package:clean_arch/core/use_case/use_case.dart';
 import 'package:clean_arch/feature/domain/entities/person_entity.dart';
@@ -12,8 +13,10 @@ class GetAllPersons extends UseCase<List<PersonEntity>, PagePersonParams> {
   GetAllPersons(this.personRepository);
 
   @override
-  Future<Either<Failure, List<PersonEntity>>> call(PagePersonParams params) async =>
-      await personRepository.getAllPersons(params.page);
+  Future<Either<Failure, List<PersonEntity>>> call(
+      PagePersonParams params) async {
+    return await personRepository.getAllPersons(params.page);
+  }
 }
 
 class PagePersonParams extends Equatable {

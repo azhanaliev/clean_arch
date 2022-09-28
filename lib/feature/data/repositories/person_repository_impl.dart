@@ -1,3 +1,4 @@
+import 'package:dartz/dartz.dart';
 import 'package:clean_arch/core/error/exception.dart';
 import 'package:clean_arch/core/error/failure.dart';
 import 'package:clean_arch/core/platform/network_info.dart';
@@ -6,42 +7,46 @@ import 'package:clean_arch/feature/data/data_sources/person_remote_data_source.d
 import 'package:clean_arch/feature/data/models/person_model.dart';
 import 'package:clean_arch/feature/domain/entities/person_entity.dart';
 import 'package:clean_arch/feature/domain/repositories/person_repository.dart';
-import 'package:dartz/dartz.dart';
 
 class PersonRepositoryImpl implements PersonRepository {
-  final PersonRemoteDataSourceImpl personRemoteDataSourceImpl;
-  final PersonLocalDataSourceImpl personLocalDataSourceImpl;
+  final PersonRemoteDataSource remoteDataSource;
+  final PersonLocalDataSource localDataSource;
   final NetworkInfo networkInfo;
 
-  PersonRepositoryImpl(
-    this.personRemoteDataSourceImpl,
-    this.personLocalDataSourceImpl,
-    this.networkInfo,
-  );
+  PersonRepositoryImpl({
+    required this.remoteDataSource,
+    required this.localDataSource,
+    required this.networkInfo,
+  });
 
   @override
-  Future<Either<Failure, List<PersonEntity>>> getAllPersons(int page) async =>
-      _getPersons(() => personRemoteDataSourceImpl.getAllPersons(page));
+  Future<Either<Failure, List<PersonEntity>>> getAllPersons(int page) async {
+    return await _getPersons(() {
+      return remoteDataSource.getAllPersons(page);
+    });
+  }
 
   @override
-  Future<Either<Failure, List<PersonEntity>>> searchPerson(
-          String query) async =>
-      _getPersons(() => personRemoteDataSourceImpl.searchPerson(query));
+  Future<Either<Failure, List<PersonEntity>>> searchPerson(String query) async {
+    return await _getPersons(() {
+      return remoteDataSource.searchPerson(query);
+    });
+  }
 
-  _getPersons(Future<List<PersonModel>> Function() getPersons) async {
+  Future<Either<Failure, List<PersonModel>>> _getPersons(
+      Future<List<PersonModel>> Function() getPersons) async {
     if (await networkInfo.isConnected) {
       try {
-        final remotePersons = await getPersons();
-        personLocalDataSourceImpl.personsToCache(remotePersons);
-        return Right(remotePersons);
+        final remotePerson = await getPersons();
+        localDataSource.personsToCache(remotePerson);
+        return Right(remotePerson);
       } on ServerException {
         return Left(ServerFailure());
       }
     } else {
       try {
-        final localPersons =
-            await personLocalDataSourceImpl.getLastPersonsFromCache();
-        return Right(localPersons);
+        final localPerson = await localDataSource.getLastPersonsFromCache();
+        return Right(localPerson);
       } on CacheException {
         return Left(CacheFailure());
       }
